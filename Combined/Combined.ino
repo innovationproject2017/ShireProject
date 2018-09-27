@@ -19,11 +19,69 @@ int pixel_section;                     //keeps track of beginning of lit strip
 uint8_t width = 15;                    //Thickness of lit strip   
 uint8_t x_coord = 0;                   // Current x-coordinate we are looking at
 uint8_t y_coord = 0;                   // Current y-coordinate we are looking at
-int lightDir = UP;                          //Direction of lights
+int lightDir = UP;                     //Direction of lights
+uint16_t buttonPressed = 0;            //Used to prevent multiple increment/decrements on a button press
 
 // Initialize the LED Strip:
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_LIGHTS, PIN);
 
+void sweep(uint16_t n, uint8_t x, uint8_t y, uint8_t width, uint8_t lightDir){
+  //Select based on direction input
+    switch (lightDir){
+        case UP:
+            // Loop back when we reach the end of the sequence
+            if (pixel_section-width > 30){
+                pixel_section = 1;
+            }
+            //Light strip within range specified by width
+            if ((y > pixel_section) && (y< pixel_section+width)) {
+                strip.setPixelColor(n, 5*x,9*y,3*(x+y));
+            } else {
+                strip.setPixelColor(n, 0,0,0);
+            }   
+            break;
+        case DOWN: 
+            // Loop back when we reach the end of the sequence
+            if (pixel_section+width < 0){ //Min y coordinate
+                pixel_section = 30; //Set LEDs to light back at the top (max Y coordinate)
+            }
+            //Light strip within range specified by width
+            if ((y > pixel_section) && (y< pixel_section+width)) {
+                strip.setPixelColor(n, 5*x,9*y,3*(x+y));
+            } else {
+                strip.setPixelColor(n, 0,0,0);
+            }   
+            break;
+        case LEFT: 
+            // Loop back when we reach the end of the sequence
+            if (pixel_section+width < 0){
+                pixel_section = 50;
+            }
+            //Light strip within range specified by width
+            if ((x > pixel_section) && (x< pixel_section+width)) {
+                strip.setPixelColor(n, 5*x,9*y,3*(x+y));
+            } else {
+                strip.setPixelColor(n, 0,0,0);
+            }   
+            break;
+        case RIGHT:
+            // Loop back when we reach the end of the sequence
+            if (pixel_section-width > 50){ ///ERROR(?): pixels start lit a section in instead of sliding in; I don't know why
+                pixel_section = 1;
+            }
+            //Light strip within range specified by width
+            if ((x > pixel_section) && (x< pixel_section+width)) {
+                strip.setPixelColor(n, 5*x,9*y,3*(x+y));
+            } else {
+                strip.setPixelColor(n, 0,0,0);
+            }   
+            break;
+    }       
+    return;
+}
+
+
+//////// All of the sweeps were combined in the above function //////////
 void sweep_down(uint16_t n, uint8_t x, uint8_t y, uint8_t width){
     // Loop back when we reach the end of the sequence
     if (pixel_section+width < 0){ //Min y coordinate
@@ -79,7 +137,7 @@ void sweep_left(uint16_t n, uint8_t x, uint8_t y, uint8_t width){
     }   
     return;
 }
-
+//////////////////////////////////////////////////////////////////
 
 /////////IDK Wbat this stuff is for ////////////////
 // This type of function writes a pixel value given x, y coordinates, and a pixel_sectioner
@@ -108,7 +166,7 @@ void setup() {
 
 void loop() {
   // reset pixel iteration count
-  i = 0; 
+  i = 0;
   while(1) {
     //Map pixel to the sign layout
     x_coord = pixel_array[i][0];
@@ -127,24 +185,8 @@ void loop() {
     else if ((digitalRead(2) == HIGH) && (digitalRead(3) == HIGH)){
       lightDir = RIGHT;
     }
-    
+    sweep(i, x_coord, y_coord, width, lightDir);
 		
-   //Select based on direction input
-		switch (lightDir){
-    		case UP:
-      		sweep_up(i, x_coord, y_coord, width);
-      	  break;
-    		case DOWN: 
-    		  sweep_down(i, x_coord, y_coord, width); 
-          break;
-    		case LEFT: 
-    		  sweep_left(i, x_coord, y_coord, width); 
-          break;
-        case RIGHT:
-    		  sweep_right(i, x_coord, y_coord, width); 
-          break;
-  	
-    }		
     //Increment through all pixels and then break to update strip location
     i++;
     if (i == 294){
@@ -156,14 +198,24 @@ void loop() {
 
   //Lit Section Thickness
   if (digitalRead(4) == LOW){
-    if (width < 15){
-      width++; //increase width
+    //Prevents multiple increments on each press
+    if (!buttonPressed){    
+      if (width < 15){
+        width++; //increase width
+      }
+      buttonPressed = 1;
     }
   }
-  if (digitalRead(5) == LOW){
-    if (width > 2){
-      width--; //decrease width
+  else if (digitalRead(5) == LOW){
+    if (!buttonPressed){
+      if (width > 2){
+        width--; //decrease width
+      }
+      buttonPressed = 1;
     }
+  }
+  else{
+    buttonPressed = 0; 
   }
 
   //Adjusting lit strip section starting point (sweep direction)
@@ -174,7 +226,6 @@ void loop() {
     pixel_section++;
 	}
  
- //Delay for ???
   delay(DEL);
 }
 
