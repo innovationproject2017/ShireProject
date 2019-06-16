@@ -19,6 +19,28 @@ Note: The file Shire_Sign_Address_Map.xlsx shows the physical Neopixel LED mappi
 
 ---
 
+## v0.21
+
+## General Changes
+
+* Added flashing sign when bluetooth connection is made and loop() has started.
+* Added user ability to control sweep speed
+* Added user ability to change thickness
+* Added user ability to change sweep direction to any direction instead of just up/down.
+* Fixed bug related to sweep direction
+* General code cleanup
+
+## Known Bugs
+
+## Upcoming Features
+
+* Add user ability to choose color
+* Add motion sensor detection
+* Add accelerometer parsing
+* Readd DEBUG flag modification for ease of debug usage
+
+---
+
 ## v0.20
 
 ## General Changes
