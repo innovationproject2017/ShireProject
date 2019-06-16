@@ -24,9 +24,10 @@ Note: The file Shire_Sign_Address_Map.xlsx shows the physical Neopixel LED mappi
 ## General Changes
 
 * Added flashing sign when bluetooth connection is made and loop() has started.
-* Added user ability to control sweep speed
-* Added user ability to change thickness
-* Added user ability to change sweep direction to any direction instead of just up/down.
+* Added user ability to control sweep speed (Controller)
+* Added user ability to change thickness (Controller)
+* Added user ability to change sweep direction to any direction instead of just up/down. (Controller)
+* Added user ability to choose color (Color Picker)
 * Fixed bug related to sweep direction
 * General code cleanup
 
@@ -34,9 +35,10 @@ Note: The file Shire_Sign_Address_Map.xlsx shows the physical Neopixel LED mappi
 
 ## Upcoming Features
 
-* Add user ability to choose color
 * Add motion sensor detection
+    * To do this: Pick pin as input, read it every time in loop(), determine pattern state
 * Add accelerometer parsing
+    * To do this: Use bluefruit example code and play with xyz thresholds.  Create new pattern
 * Readd DEBUG flag modification for ease of debug usage
 
 ---

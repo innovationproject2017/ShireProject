@@ -49,6 +49,10 @@ extern uint8_t packetbuffer[];
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_LIGHTS, NEOPIXEL_IN);	//Initialize NeoPixel object
 
+uint8_t red = 0;
+uint8_t green = 0;
+uint8_t blue = 0;
+
 uint8_t neopixel_pos_x = 0;		//Keeps track of LED strip position in x direction for sweeping
 uint8_t neopixel_pos_y = 0;		//Keeps track of LED strip position in y direction for sweeping
 neopixel_state neopixel_current = NP_DOWN;
@@ -132,6 +136,9 @@ void neopixel_pattern(uint16_t n, uint8_t x, uint8_t y){
 		case NP_ALL_GREEN:
 			strip.setPixelColor(n, 0, 0, 255);
 			break;
+		case NP_PICK:
+			strip.setPixelColor(n, red, green, blue);
+			break;
 		default:
 			break;
     }
@@ -166,7 +173,7 @@ void neopixel_frame_update(){
 		neopixel_patterns(i, pgm_read_byte(&(pixel_array[i][0])), pgm_read_byte(&(pixel_array[i][1])));
 	}
 
-	//Adjust LED position in x and y directions for next frame
+	//Adjust LED position in x and y directions for next frame depending on state
 	switch (neopixel_current){
 		case NP_UP:
 			neopixel_pos_y++;
@@ -184,7 +191,7 @@ void neopixel_frame_update(){
 			break;
 	}
 
-	//Set current state as the previous state to keep history
+	//Set current state as the previous state to keep history required for future patterns
 	neopixel_previous = neopixel_current;
 	
 	//Then show it by displaying current NeoPixel frame
@@ -200,11 +207,11 @@ void neopixel_frame_update(){
 		neopixel_delay_val--;
 		neopixel_delay == NEOPIXEL_DELAY_NONE;
 	}
+	
 	delay(neopixel_delay_val);
 }
 
-void setup(void)
-{
+void setup(void) {
 	
   //----------------------------DO NOT MODIFY : FROM BLUEFRUIT SETUP EXAMPLE------------------
   while (!Serial);  // required for Flora & Micro
@@ -304,7 +311,9 @@ void loop(void) {
 	  return;
 	}
 
-	//Otherwise analyze data received from bluetooth module
+	//Otherwise analyze data received from bluetooth module and process based on option chosen (Controller, color picker, etc...)
+	
+	//Controller
 	if (packetbuffer[1] == 'B') {
     uint8_t buttnum = packetbuffer[2] - '0';
     boolean buttonPressed = packetbuffer[3] - '0';
@@ -343,5 +352,20 @@ void loop(void) {
 		else {
 			Serial.println(" released");
 		}
+	}
+	
+	//Color Picker
+	if (packetbuffer[1] == 'C') {
+		neopixel_current = NP_PICK;
+		red = packetbuffer[2];
+		green = packetbuffer[3];
+		blue = packetbuffer[4];
+		Serial.print ("RGB #");
+		if (red < 0x10) Serial.print("0");
+		Serial.print(red, HEX);
+		if (green < 0x10) Serial.print("0");
+		Serial.print(green, HEX);
+		if (blue < 0x10) Serial.print("0");
+		Serial.println(blue, HEX);
 	}
 }
