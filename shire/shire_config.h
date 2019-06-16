@@ -110,18 +110,33 @@
 
 //Setup NeoPixel Refresh Interval
 #define NEOPIXEL_DELAY 1	//Delay in ms
+#define MAX_NP_DELAY 50
+#define MIN_NP_DELAY 1
 
 //Sign Dimensions
 #define MAX_X 50
 #define MAX_Y 30
+#define MAX_THICKNESS 15
+#define MIN_THICKNESS 1
 
-//Direction
+//State of the neopixel pattern and thickness
 typedef enum {
-	UP,
-	DOWN,
-	LEFT,
-	RIGHT,
-} Direction;
+	NP_UP,
+	NP_DOWN,
+	NP_LEFT,
+	NP_RIGHT,
+	NP_ALL_WHITE,
+	NP_ALL_RED,
+	NP_ALL_BLUE,
+	NP_ALL_GREEN,
+	NP_FLASH,
+	NP_THICKNESS_INC,
+	NP_THICKNESS_DEC,
+	NP_THICKNESS_NONE,
+	NP_DELAY_INC,
+	NP_DELAY_DEC,
+	NP_DELAY_NONE
+} neopixel_state;
 
 //Create 2D array LUT (look up table) of the NeoPixel individual LEDs and initialize it into program memory
 //See shire spreadsheet for explanation of values
