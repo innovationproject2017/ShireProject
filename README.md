@@ -33,6 +33,8 @@ Note: The file Shire_Sign_Address_Map.xlsx shows the physical Neopixel LED mappi
 
 ## Known Bugs
 
+* When using Color Picker or inputting hard coded RGB values for the NeoPixel, current draw reaches beyond capabilities of current power supply.  Ensure that your values are a low enough.  If the LEDs flash intermittently when using a high RGB combination value (e.g. 150,150,150), lower the combination of values (e.g. 100,100,100).  Can be used as a demonstration of what too much current draw may look like!
+
 ## Upcoming Features
 
 * Add motion sensor detection
