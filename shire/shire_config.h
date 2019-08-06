@@ -110,14 +110,14 @@
 
 //Setup NeoPixel Refresh Interval
 #define NEOPIXEL_DELAY 1	//Delay in ms
-#define MAX_NP_DELAY 50
+#define MAX_NP_DELAY 200
 #define MIN_NP_DELAY 1
 
 //Sign Dimensions
-#define MAX_X 50
-#define MAX_Y 30
-#define MAX_THICKNESS 15
-#define MIN_THICKNESS 1
+#define MAX_X 49
+#define MAX_Y 29
+#define MAX_THICKNESS 14
+#define MIN_THICKNESS 0
 
 //State of the neopixel pattern and thickness
 typedef enum {

@@ -59,7 +59,7 @@ neopixel_state neopixel_current = NP_DOWN;
 neopixel_state neopixel_previous = NP_DOWN;
 
 neopixel_state neopixel_thickness = NP_THICKNESS_NONE;
-uint8_t neopixel_thickness_val = 1;		//Thickness of lit strip
+uint8_t neopixel_thickness_val = 0;		//Thickness of lit strip
 
 neopixel_state neopixel_delay = NP_DELAY_NONE;
 uint16_t neopixel_delay_val = 1;	//Default delay value in ms
@@ -76,65 +76,85 @@ void neopixel_pattern(uint16_t n, uint8_t x, uint8_t y){
 	//Select based on pattern selection by button, bluefruit controller, color picker, etc
     switch (neopixel_current){
         case NP_UP:
-            // Loop back when we reach the end of the sequence
-            if (neopixel_pos_y - neopixel_thickness_val > MAX_Y){
-                neopixel_pos_y = 0;
+            // Loop back to the thickness offset when we reach the end of the sequence
+            if (neopixel_pos_y - neopixel_thickness_val >= MAX_Y){
+                neopixel_pos_y = neopixel_thickness_val;
             }
             //Light strip within range specified by neopixel_thickness_val
-            if ((y > neopixel_pos_y) && (y < neopixel_pos_y+neopixel_thickness_val)) {
+            if ((y >= neopixel_pos_y) && (y <= neopixel_pos_y + neopixel_thickness_val)) {
                 strip.setPixelColor(n, 5*x,9*y,3*(x+y));
             } else {
                 strip.setPixelColor(n, 0,0,0);
             }
 			
+			//This accounts for the wrap around
+			if ((y >= neopixel_pos_y - MAX_Y) && (y <= neopixel_pos_y - MAX_Y + neopixel_thickness_val)) {
+				strip.setPixelColor(n, 5*x,9*y,3*(x+y));
+			}
+			
             break;
         case NP_DOWN: 
             // Loop back when we reach the end of the sequence
-            if (neopixel_pos_y + neopixel_thickness_val < 0){ //Min y coordinate
-                neopixel_pos_y = MAX_Y; //Set LEDs to light back at the top (max Y coordinate)
+            if (neopixel_pos_y > MAX_Y + neopixel_thickness_val){
+                neopixel_pos_y = MAX_Y;
             }
             //Light strip within range specified by neopixel_thickness_val
-            if ((y > neopixel_pos_y) && (y < neopixel_pos_y + neopixel_thickness_val)) {
+            if ((y >= neopixel_pos_y) && (y <= neopixel_pos_y + neopixel_thickness_val)) {
                 strip.setPixelColor(n, 5*x,9*y,3*(x+y));
             } else {
                 strip.setPixelColor(n, 0,0,0);
-            }   
+            }
+			
+			//This accounts for the wrap around
+			if ((y >= neopixel_pos_y - MAX_Y) && (y <= neopixel_pos_y - MAX_Y + neopixel_thickness_val)) {
+				strip.setPixelColor(n, 5*x,9*y,3*(x+y));
+			}
             break;
         case NP_LEFT: 
             // Loop back when we reach the end of the sequence
-            if (neopixel_pos_x + neopixel_thickness_val < 0){
+            if (neopixel_pos_x > MAX_X + neopixel_thickness_val){
                 neopixel_pos_x = MAX_X;
             }
             //Light strip within range specified by neopixel_thickness_val
-            if ((x > neopixel_pos_x) && (x < neopixel_pos_x + neopixel_thickness_val)) {
+            if ((x >= neopixel_pos_x) && (x <= neopixel_pos_x + neopixel_thickness_val)) {
                 strip.setPixelColor(n, 5*x,9*y,3*(x+y));
             } else {
                 strip.setPixelColor(n, 0,0,0);
-            }   
+            }
+			
+			//This accounts for the wrap around
+			if ((x >= neopixel_pos_x - MAX_X) && (x <= neopixel_pos_x - MAX_X + neopixel_thickness_val)) {
+				strip.setPixelColor(n, 5*x,9*y,3*(x+y));
+			}
             break;
         case NP_RIGHT:
-            // Loop back when we reach the end of the sequence
-            if (neopixel_pos_x - neopixel_thickness_val > MAX_X){
-                neopixel_pos_x = 0;
+            // Loop back to the thickness offset when we reach the end of the sequence
+            if (neopixel_pos_x - neopixel_thickness_val >= MAX_X){
+                neopixel_pos_x = neopixel_thickness_val;
             }
             //Light strip within range specified by neopixel_thickness_val
-            if ((x > neopixel_pos_x) && (x < neopixel_pos_x + neopixel_thickness_val)) {
+            if ((x >= neopixel_pos_x) && (x <= neopixel_pos_x + neopixel_thickness_val)) {
                 strip.setPixelColor(n, 5*x,9*y,3*(x+y));
             } else {
                 strip.setPixelColor(n, 0,0,0);
-            }   
+            }
+			
+			//This accounts for the wrap around
+			if ((x >= neopixel_pos_x - MAX_X) && (x <= neopixel_pos_x - MAX_X + neopixel_thickness_val)) {
+				strip.setPixelColor(n, 5*x,9*y,3*(x+y));
+			}
             break;
 		case NP_ALL_WHITE:
-			strip.setPixelColor(n, 255, 255, 255);
+			strip.setPixelColor(n, 100, 100, 100);
 			break;
 		case NP_ALL_RED:
-			strip.setPixelColor(n, 255, 0, 0);
+			strip.setPixelColor(n, 100, 0, 0);
 			break;
 		case NP_ALL_BLUE:
-			strip.setPixelColor(n, 0, 255, 0);
+			strip.setPixelColor(n, 0, 100, 0);
 			break;
 		case NP_ALL_GREEN:
-			strip.setPixelColor(n, 0, 0, 255);
+			strip.setPixelColor(n, 0, 0, 100);
 			break;
 		case NP_PICK:
 			strip.setPixelColor(n, red, green, blue);
@@ -157,20 +177,20 @@ void neopixel_frame_update(){
 
 	//Set Thickness before setting LEDs
 	//Verify that button has been pressed and has not already been pressed and held to avoid rapid increase or decrease
-	if (neopixel_thickness == NEOPIXEL_THICKNESS_INC && (neopixel_thickness_val < MAX_THICKNESS)){
+	if (neopixel_thickness == NP_THICKNESS_INC && (neopixel_thickness_val < MAX_THICKNESS)){
 		neopixel_thickness_val++;
-		neopixel_thickness == NEOPIXEL_THICKNESS_NONE;
+		neopixel_thickness = NP_THICKNESS_NONE;
 	}
-	else if (neopixel_thickness == NEOPIXEL_THICKNESS_DEC && (neopixel_thickness_val > MIN_THICKNESS)){
+	else if (neopixel_thickness == NP_THICKNESS_DEC && (neopixel_thickness_val > MIN_THICKNESS)){
 		neopixel_thickness_val--;
-		neopixel_thickness == NEOPIXEL_THICKNESS_NONE;
+		neopixel_thickness = NP_THICKNESS_NONE;
 	}
 
 	//Set all individual NeoPixel LEDs with appropriate color...
 	for (uint16_t i = 0; i < NUM_LIGHTS; i++){
 		//Grab LED location based on LED matrix [See Excel Spreadsheet for coordinate sytem and header file for table lookup]
 		//Since the table is loaded into program memory to save dynamic memory space, pgm_read_byte must be used
-		neopixel_patterns(i, pgm_read_byte(&(pixel_array[i][0])), pgm_read_byte(&(pixel_array[i][1])));
+		neopixel_pattern(i, pgm_read_byte(&(pixel_array[i][0])), pgm_read_byte(&(pixel_array[i][1])));
 	}
 
 	//Adjust LED position in x and y directions for next frame depending on state
@@ -199,13 +219,13 @@ void neopixel_frame_update(){
   
 	//Update frame delay
 	//Verify that button has been pressed and has not already been pressed and held to avoid rapid increase or decrease
-	if (neopixel_delay == NEOPIXEL_DELAY_INC && (neopixel_delay_val < MAX_NP_DELAY)){
-		neopixel_delay_val++;
-		neopixel_delay == NEOPIXEL_DELAY_NONE;
+	if (neopixel_delay == NP_DELAY_INC && (neopixel_delay_val < MAX_NP_DELAY)){
+		neopixel_delay_val += 50;
+		neopixel_delay = NP_DELAY_NONE;
 	}
-	else if (neopixel_delay == NEOPIXEL_DELAY_DEC && (neopixel_delay_val > MIN_NP_DELAY)){
-		neopixel_delay_val--;
-		neopixel_delay == NEOPIXEL_DELAY_NONE;
+	else if (neopixel_delay == NP_DELAY_DEC && (neopixel_delay_val > MIN_NP_DELAY)){
+		neopixel_delay_val -= 50;
+		neopixel_delay = NP_DELAY_NONE;
 	}
 	
 	delay(neopixel_delay_val);
@@ -278,17 +298,23 @@ void setup(void) {
   //-----------------------------BEGIN USER SETUP----------------------------------
 
 	strip.begin();	//Fully initialize the pin and pixel count of object
+	delay(100);
 	strip.clear();  //Turn off all LEDs and clear frame matrix
+	delay(100);
 	
 	//Change colors of sign and start sweep to right to show connectivity is ready
 	neopixel_current = NP_ALL_RED;
 	neopixel_frame_update();
+	delay(500);
 	neopixel_current = NP_ALL_BLUE;
 	neopixel_frame_update();
+	delay(500);
 	neopixel_current = NP_ALL_GREEN;
 	neopixel_frame_update();
+	delay(500);
 	neopixel_current = NP_ALL_WHITE;
 	neopixel_frame_update();
+	delay(500);
 	neopixel_current = NP_RIGHT;
 	
 	//Direction Inputs pin setup
@@ -320,34 +346,35 @@ void loop(void) {
     Serial.print ("Button "); Serial.print(buttnum);
 		if (buttonPressed) {
 			switch (buttnum){
-				case 0:
+				case 5:
 					neopixel_current = NP_UP;
 					break;
-				case 1:
+				case 6:
 					neopixel_current = NP_DOWN;
 					break;
-				case 2:
+				case 7:
 					neopixel_current = NP_LEFT;
 					break;
-				case 3:
+				case 8:
 					neopixel_current = NP_RIGHT;
 					break;
-				case 4:
+				case 1:
 					neopixel_thickness = NP_THICKNESS_INC;
 					break;
-				case 5:
+				case 3:
 					neopixel_thickness = NP_THICKNESS_DEC;
 					break;
-				case 6:
+				case 2:
 					neopixel_delay = NP_DELAY_INC;
 					break;
-				case 7:
+				case 4:
 					neopixel_delay = NP_DELAY_DEC;
 					break;
 				default:
 					break;
 			}
 			Serial.println(" pressed");
+			buttonPressed = 0; //Prevents the above states from changing multiple times in one press.
 		}
 		else {
 			Serial.println(" released");
